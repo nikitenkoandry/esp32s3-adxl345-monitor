@@ -1,0 +1,31 @@
+# Local Python environments and bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Firmware toolchains and generated outputs
+.pio/
+build/
+dist/
+*.bin
+*.elf
+*.map
+*.hex
+*.uf2
+*.exe
+*.zip
+*.spec
+
+# Measurements, local settings, and credentials
+captures/
+*.csv
+*.log
+.env
+.env.*
+*.pem
+*.key
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
