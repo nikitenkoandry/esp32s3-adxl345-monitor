@@ -8,6 +8,31 @@ The repository contains source code, documentation, and setup/build scripts.
 Firmware images, Windows executables, Python environments, toolchains, and
 measurement files are generated locally and excluded from Git.
 
+## Download v1.0.0
+
+Get the ready-to-flash **ESP-IDF firmware** and standalone **Windows x64 monitor**
+from the [v1.0.0 release](https://github.com/nikitenkoandry/esp32s3-adxl345-monitor/releases/tag/v1.0.0).
+You do not need ESP-IDF to install the packaged firmware, or Python to run the EXE.
+The firmware upload helper requires Python 3.10+ and installs esptool separately.
+
+Start with the [wiring and launch guide](docs/quick-start.md). Release assets stay
+on GitHub Releases; the repository keeps sources and documentation.
+
+## Monitor preview
+
+### Live XYZ acceleration
+
+![Live XYZ acceleration graphs](docs/images/ui-xyz-graphs.png)
+
+Three synchronized plots, current acceleration, CSV recording, and stream health.
+
+### Gravity-based 3D tilt
+
+![Gravity-based 3D orientation view](docs/images/ui-3d-orientation.png)
+
+Roll/pitch, adjustable smoothing, and a reference pose. These screenshots show a
+real connected monitor; ADXL345 alone does not measure yaw or a movement path.
+
 ## Project layout
 
 ```text
@@ -136,6 +161,7 @@ argument; the upload script accepts it after the COM port.
 ## Documentation
 
 - [Firmware setup and architecture](firmware/README.md)
+- [Release quick start: wiring, flashing, and Windows EXE](docs/quick-start.md)
 - [Monitor controls, recording, and troubleshooting](tools/monitor/README.md)
 - [Serial protocol and diagnostic fields](docs/serial-protocol.md)
 - [Historical hardware verification and reproducible checks](docs/validation.md)
@@ -143,3 +169,16 @@ argument; the upload script accepts it after the COM port.
 The C source files include English descriptions of the wiring, data flow,
 configuration, error handling, and timing limitations. The existing Python
 monitor remains unchanged; the previous Arduino firmware is in Git history.
+
+## Preparing release assets
+
+After building the Windows EXE, run from the repository root:
+
+```powershell
+.\tools\monitor\.venv\Scripts\python.exe scripts\release\build_release.py
+```
+
+This verifies the four firmware image hashes against the hardware-tested v1.0.0
+images and checks that their sources still match the verified revision. It
+creates ZIPs, a Quick Start, and SHA-256 checksums under `dist/v1.0.0/`, without
+opening a COM port or publishing. See [release notes](docs/releases/v1.0.0.md).
