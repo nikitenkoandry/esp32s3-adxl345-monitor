@@ -1,6 +1,7 @@
 # Serial protocol
 
-This document describes the current firmware contract, not a proposed extension.
+This contract is retained by the native ESP-IDF C firmware and the historical
+Arduino implementation. No PC monitor protocol change is required.
 The running UART0 stream uses **921600 baud, 8 data bits, no parity, 1 stop bit**.
 The supplied target routes it through the board's USB-UART adapter. Lines end in
 LF; receivers may strip CR/LF and must tolerate fragmented USB reads.
@@ -75,3 +76,13 @@ divided by nominal 800 Hz; a recording started later can begin at a nonzero inde
 `pc_rx_time_utc` is the PC batch processing time. `gap_before=1` indicates a known
 or suspected discontinuity; its exact sensor-time duration is unavailable.
 Display units and tilt smoothing do not alter the raw g values in this file.
+
+## ESP-IDF transport and failure handling
+
+UART0 uses GPIO43 TX / GPIO44 RX through the USB-UART bridge. Normal runtime
+output has no ESP-IDF log prefixes; console and ordinary SDK logs are disabled
+by sdkconfig.defaults. Reset-time ROM output can still occur at another baud.
+Startup/fatal setup messages begin with `#`. On a selected runtime SPI/status
+failure, acquisition stops with `spi_faults` incremented; the ISR is disabled
+before its recipient task is deleted. Existing diagnostics continue, and a reset
+is required to restart acquisition.

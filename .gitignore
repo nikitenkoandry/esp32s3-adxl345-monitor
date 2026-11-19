@@ -20,6 +20,7 @@ dist/
 # Measurements, local settings, and credentials
 captures/
 *.csv
+!firmware/partitions.csv
 *.log
 .env
 .env.*
@@ -29,3 +30,7 @@ captures/
 .idea/
 .DS_Store
 Thumbs.db
+
+# ESP-IDF generated local configuration; commit sdkconfig.defaults instead.
+firmware/sdkconfig
+firmware/sdkconfig.old

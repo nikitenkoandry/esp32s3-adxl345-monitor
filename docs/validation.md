@@ -1,6 +1,79 @@
 # Validation and reproducible checks
 
-## Repository layout verification — 17 November 2026
+## Native ESP-IDF C port — 19 November 2026
+
+The current firmware application was rewritten in C and built with the installed
+ESP-IDF **6.0.2** SDK for ESP32-S3. Application compilation uses four C translation
+units; the build has no Arduino component. The full 16 MB partition layout and
+generated bootloader/partition/application flash arguments were produced.
+
+Checks completed for the C port:
+
+- Production SPI driver tested with a modeled register bus: pins/mode/clock/CS,
+  configuration, wrong DEVID, corrupt readback, transfer failure, signed XYZ
+  decoding, six-byte bursts, and post-read delay.
+- Production acquisition task/ISR tested in six separate scenarios: normal
+  IRQ/FIFO operation with warmup, notification coalescing, timestamp wrap,
+  backpressure and an empty wake; invalid FIFO count; register transfer failure;
+  burst transfer failure; task allocation failure; and GPIO ISR allocation failure.
+- Actual C-generated XYZ and maximum-width IRQ_STATS lines passed through the
+  unchanged PC receiver in seven-byte fragments, with zero malformed rows or
+  unexpected gap markers in the healthy fixture.
+- All **24 existing monitor tests passed**. No Python monitor application change
+  was needed.
+- Windows helpers were migrated from PlatformIO to native ESP-IDF. Upload still
+  requires an explicit serial port.
+
+These build and simulated host checks preceded the hardware run documented
+below. Historical Arduino measurements are kept in a separate section and must
+not be attributed to the C port.
+
+## ESP-IDF hardware verification — 19 November 2026
+
+The native C firmware was flashed to the physical ESP32-S3 on COM16 with all four
+write checksums verified: bootloader, partition table, initial OTA data, and app.
+The first 1 MiB of the previous flash was saved in two independent reads with
+matching SHA-256 hashes. This backup covers every sector written by this upload;
+it is not a full 16 MiB flash dump. Backups and captures remain private, ignored
+build artifacts.
+
+A reset/startup probe identified the `ESP-IDF C` startup tag and working INT1.
+The following steady-state capture ran for 120 seconds without resetting:
+
+| Measurement | ESP-IDF result |
+| --- | --- |
+| Valid XYZ samples | 94,256 |
+| PC reception rate | 785.46 samples/s |
+| INT1 edge rate | 785.439 Hz |
+| IRQ period extrema | 1270–1276 us |
+| Maximum reported task service latency | 15 us |
+| Maximum observed FIFO occupancy | 1 sample |
+| FIFO full / queue drops / timeouts / SPI faults | 0 / 0 / 0 / 0 |
+| Malformed lines / warning messages | 0 / 0 |
+
+All 94,256 samples also passed through the unchanged monitor tilt estimator,
+with zero gap markers. The captured signal included changing gravity directions
+and some dynamic acceleration: 92,440 states were classified gravity-like and
+1,816 dynamic. The largest model change over 16 samples (20 ms nominal) was
+3.709 degrees, with no artificial 180-degree step in this capture. This is a
+numerical continuity check, not measured GUI frame timing or calibrated physical
+angle accuracy. Reported latency describes task service, not PC delivery time.
+
+The unchanged Windows EXE connected at 921600 baud and displayed real XYZ graphs
+and the 3D model. Growing sample/INT1 counts and zero bad lines, warnings, UI drops,
+FIFO full events, firmware drops, and timeouts were observed on both pages.
+On the final GUI connection, 203,349 samples and a cumulative INT1 count of
+822,948 were visible with all listed fault counters still zero. The 3D tab
+remained live; physical angle accuracy was not calibrated. The verification tool
+saved the primary capture used for numerical analysis.
+
+Local reports are `firmware/build/hardware_check/esp_idf_flash_manifest.json`,
+`esp_idf_stability_120s.json`, `esp_idf_stability_120s_model.json`, and
+`esp_idf_gui_verified.json`. These
+machine-specific reports and raw captures are excluded from the source repository.
+The observations apply to this board and test interval, not every ADXL345 module.
+
+## Historical repository layout verification — 17 November 2026
 
 After separating the firmware and desktop tool into this repository:
 
@@ -19,7 +92,7 @@ COM-port argument before attempting an upload.
 
 ## Historical hardware result
 
-The firmware logic and desktop monitor were tested on a physical ESP32-S3 board
+The **historical Arduino firmware** and desktop monitor were tested on a physical ESP32-S3 board
 with 16 MB flash and an ADXL345 on **16 November 2026**. The board used USB-UART
 COM16 and the wiring in the repository README.
 
@@ -66,7 +139,8 @@ peak-preserving graph downsampling, known tilt poses, angle wrap, full-turn
 continuity, filter recovery after rejected acceleration, free fall, and IRQ
 diagnostic parsing.
 
-Build the firmware from `firmware/` with `scripts/Build_Firmware.cmd`. A successful
+Build the native C firmware from an activated ESP-IDF 6.0.2 environment in
+`firmware/` with `scripts/Build_Firmware.cmd`. A successful
 build verifies the source and build configuration; it does not prove physical
 wiring, sensor performance, or a flashed board's behavior.
 

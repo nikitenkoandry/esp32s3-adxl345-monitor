@@ -1,6 +1,6 @@
 # ESP32-S3 ADXL345 Monitor
 
-Interrupt-driven ADXL345 firmware and an English desktop acceleration monitor.
+Native ESP-IDF C firmware for ADXL345 and an English desktop acceleration monitor.
 Read XYZ over SPI, stream measurements through USB-UART, view live plots and a
 gravity-based 3D tilt model, and record raw acceleration to CSV.
 
@@ -11,9 +11,10 @@ measurement files are generated locally and excluded from Git.
 ## Project layout
 
 ```text
-firmware/                  ESP32-S3 PlatformIO project
-  ADXL345_SPI_800Hz/        Documented Arduino sketch
-  scripts/                 Windows setup, build, and upload helpers
+firmware/                  Native ESP-IDF 6.0.2 C project
+  main/                    SPI driver, ISR/task, UART, and compatible protocol
+  tests/host/              Native C driver/task/protocol regression checks
+  scripts/                 Windows ESP-IDF environment/build/upload helpers
 tools/monitor/             Standalone Python/Tk desktop tool
   pc_monitor/              Interface, serial receiver, and tilt visualization
   scripts/                 Windows setup, launch, test, and EXE build helpers
@@ -44,9 +45,10 @@ there is no polling fallback if the interrupt wire is missing.
 
 ## Quick start on Windows
 
-Install **Python 3.10+ with Tkinter** and make the `python` command available.
-The usual Python for Windows installer includes Tkinter. Setup scripts create
-separate local environments for the firmware tools and desktop monitor.
+For firmware, install **ESP-IDF 6.0.2** with ESP32-S3 tools and open its activated
+terminal (or set `IDF_PATH` to its checkout). Arduino and PlatformIO are not
+required. For the PC monitor, install **Python 3.10+ with Tkinter** and a working
+`python` command; its setup script creates a separate local `.venv/`.
 
 ### 1. Build and flash the ESP32-S3
 
@@ -59,9 +61,10 @@ Run these commands from the repository root in PowerShell:
 ```
 
 Replace `COM16` with your board's port. Uploading replaces its installed firmware.
-Close Arduino Serial Monitor and the desktop monitor before uploading. The first
-build downloads the pinned Espressif platform and toolchain and needs internet
-access. You can also open `firmware/` directly in VS Code with PlatformIO.
+Close all serial monitors before uploading. `Install_Dependencies.cmd` checks and
+activates an already installed ESP-IDF; it does not download a separate Arduino
+framework. You can also open `firmware/` in the ESP-IDF VS Code extension.
+The native CLI is `idf.py -DIDF_TARGET=esp32s3 build` from that folder.
 
 ### 2. Start the desktop monitor
 
@@ -88,7 +91,7 @@ this mode; only the monitor environment is required.
 | Component | Behavior |
 | --- | --- |
 | SPI acquisition | Mode 3, 2 MHz, full resolution, +/-16 g, nominal 800 Hz ODR |
-| Interrupt handling | INT1 wakes a FreeRTOS task; SPI and Serial stay outside the ISR |
+| Interrupt handling | INT1 wakes a FreeRTOS task; SPI and UART stay outside the ISR |
 | Buffering | Sensor stream FIFO plus a nonblocking 512-sample RAM queue |
 | XYZ plots | Live values, 2–60 s history, g or m/s², independent scaling, graph pause |
 | 3D tilt | Roll/pitch, reference pose, smoothing, independent model pause, quality hints |
@@ -110,6 +113,14 @@ distort the estimate. See the detailed monitor guide for interpretation.
 
 ## Tests and optional Windows EXE
 
+Native C host checks (requires GCC/Clang and the monitor Python environment):
+
+```powershell
+.\tools\monitor\.venv\Scripts\python.exe firmware\tests\host\run_tests.py
+```
+
+Monitor checks and optional packaging:
+
 ```powershell
 .\tools\monitor\scripts\Run_Tests.cmd
 .\tools\monitor\scripts\Build_EXE.cmd
@@ -129,5 +140,6 @@ argument; the upload script accepts it after the COM port.
 - [Serial protocol and diagnostic fields](docs/serial-protocol.md)
 - [Historical hardware verification and reproducible checks](docs/validation.md)
 
-The sketch itself includes English descriptions of every function, the wiring,
-data flow, configuration, and timing limitations.
+The C source files include English descriptions of the wiring, data flow,
+configuration, error handling, and timing limitations. The existing Python
+monitor remains unchanged; the previous Arduino firmware is in Git history.
