@@ -1,92 +1,148 @@
-# ESP32-S3 firmware
+# ESP32-S3 firmware — native ESP-IDF C
 
-This folder is a complete PlatformIO project. The Arduino sketch is
-[`ADXL345_SPI_800Hz/ADXL345_SPI_800Hz.ino`](ADXL345_SPI_800Hz/ADXL345_SPI_800Hz.ino).
-Its implementation and serial contract are the same as the tested source;
-the project layout and helper scripts make setup portable.
+This is a native **ESP-IDF 6.0.2** project. Application sources are C files in
+`main/`; Arduino, the Arduino component, C++ sketches, and PlatformIO are not
+required. The previous Arduino implementation remains available in Git history.
 
-## Build configuration
+## Hardware and defaults
 
 | Setting | Value |
 | --- | --- |
-| Target | ESP32-S3-DevKitC-1, 16 MB flash |
-| Platform | Espressif32 6.12.0 |
-| Framework | Arduino-ESP32 2.0.17 supplied by the pinned platform |
-| Build/upload tool | PlatformIO Core 6.2.0 |
-| Flash mode / partition scheme | DIO / default_16MB.csv |
+| Target | ESP32-S3-DevKitC-1, 16 MB flash, no PSRAM requirement |
+| SPI host / mode / clock | SPI2 / mode 3 / 2 MHz, MSB first |
+| Pins | SCLK 12, MOSI 11, MISO 13, CS 10, INT1 4 |
+| Sensor | ADXL345, full resolution, +/-16 g, nominal 800 Hz ODR |
+| Interrupt | Active-high FIFO Watermark=1 on INT1 -> GPIO4 |
+| Buffering | Sensor stream FIFO and a 512-sample RAM queue |
+| UART | UART0, TX GPIO43 / RX GPIO44, 921600 baud, 8N1 |
 | Upload speed | 460800 baud |
-| Running serial stream | UART0 via USB-UART, 921600 baud |
-| Native USB CDC on boot | Disabled in this configuration |
+| Flash / CPU / tick rate | DIO 80 MHz, 16 MB / 240 MHz / FreeRTOS 1000 Hz |
 
-The PlatformIO board profile has other flash defaults; the supplied configuration
-explicitly selects 16 MB. Adjust it to match your physical board before flashing.
-No COM port is hard-coded in `platformio.ini`.
+Use 3.3 V power/logic and a common ground. Use the board's **USB-UART connector**;
+this project does not implement native USB CDC or USB Serial/JTAG streaming.
+The full wiring table is in the [repository README](../README.md).
 
-## Windows setup
+`partitions.csv` retains the previous 16 MB offsets, including app0 at 0x10000.
+This does not implement OTA; use the generated ESP-IDF flash arguments for a
+complete upload. Check physical flash size before changing to another board.
+`sdkconfig.defaults` is versioned; generated `sdkconfig` and `build/` are ignored.
 
-From this folder:
+## Install ESP-IDF
+
+Use Espressif's [ESP-IDF setup guide](https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32s3/get-started/index.html)
+and install ESP-IDF **6.0.2** with ESP32-S3 tools. Open its activated terminal.
+Alternatively set `IDF_PATH` to your complete SDK checkout; the Windows helpers
+call its `export.bat` to activate its tools and Python environment. No absolute
+SDK path is stored in the project.
+
+From this folder in an activated PowerShell/ESP-IDF terminal:
 
 ```powershell
 .\scripts\Install_Dependencies.cmd
 .\scripts\Build_Firmware.cmd
+# Only when you intend to replace the selected board's firmware:
 .\scripts\Upload_Firmware.cmd COM16
 ```
 
-The installer creates `firmware/.venv/` and installs the pinned PlatformIO Core.
-Helpers use `firmware/.pio/core/` for downloaded platforms/toolchains unless
-`PLATFORMIO_CORE_DIR` is already set. Build output is under
-`firmware/.pio/build/esp32s3_adxl345/`. All these generated folders are ignored by
-Git. The upload helper requires an explicit COM port and replaces the board's
-firmware; it does not back up an unrelated application already on the board.
+`Install_Dependencies.cmd` validates an installed SDK; it does not install
+PlatformIO or create an Arduino environment. Replace COM16 with your board's
+port and close other serial programs before upload. Helpers accept `/nopause`
+for automation (after the COM port for upload).
 
-## PlatformIO CLI or VS Code
-
-Open this folder with the PlatformIO VS Code extension, or use Python directly:
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m platformio run -e esp32s3_adxl345
-.\.venv\Scripts\python.exe -m platformio run -e esp32s3_adxl345 -t upload --upload-port COM16
-```
-
-CLI and VS Code can use their normal PlatformIO core/package cache. The Windows
-helpers select a project-local cache for convenience. No machine-specific paths
-or existing build directory are required by the project.
-
-## Data path
+Native CLI from this folder, after SDK activation:
 
 ```text
-ADXL345 measurement -> sensor FIFO -> INT1 / GPIO4 rising edge
-    -> ISR notification -> acquisition task -> RAM queue -> loop() -> UART -> PC
+idf.py -DIDF_TARGET=esp32s3 build
+idf.py -DIDF_TARGET=esp32s3 -p COM16 -b 460800 flash
 ```
 
-The sensor runs at nominal 800 Hz, normal power, full resolution, +/-16 g.
-Four-wire SPI uses mode 3, MSB first, 2 MHz. FIFO stream mode with a watermark of
-one sample is routed to active-high INT1. The ISR counts edges and records timing;
-it does not read SPI or print Serial.
+On macOS/Linux use ESP-IDF's `export.sh` and the same CLI with the appropriate
+serial device. The component build uses ESP-IDF's minimal-build mode. Expected
+outputs are `build/adxl345_monitor.bin`, its ELF/map, bootloader, partition table,
+and `build/flasher_args.json`. A build alone does not modify any hardware.
 
-The acquisition task drains the FIFO using six-byte XYZ bursts with 5 µs between
-reads. It discards the first 16 samples and then queues raw signed counts without
-blocking. A 512-sample queue separates acquisition from UART output. Queue drops
-are reported if the consumer cannot keep up. A notification wait beyond 100 ms
-increments a timeout; there is no timer-based polling fallback.
+## Source map
 
-At startup the sketch verifies DEVID=0xE5, configuration readback, and the INT1
-connection. The wiring test temporarily uses DATA_READY and output polarity
-inversion; steady acquisition uses WATERMARK. On the tested module, DATA_READY
-with FIFO stayed high after its first edge, while WATERMARK=1 worked reliably.
+| File | Responsibility |
+| --- | --- |
+| `main/main.c` | app_main, UART setup, INT1 line test, single output writer |
+| `main/adxl345.c` | Native SPI register/burst driver, configuration/readback |
+| `main/acquisition.c` | GPIO ISR, FreeRTOS acquisition task, counters, FIFO drain |
+| `main/monitor_protocol.c` | Pure C formatting of compatible CSV and diagnostics |
+| `main/board_config.h` | Wiring, baud, clock, queue, and settling constants |
+| `main/monitor_protocol.h` | Raw XYZ and diagnostic structures, wire formatter API |
 
-## Output and diagnostics
+## Runtime behavior
 
-The main loop converts counts to g using the nominal `1/256` scale and emits
-three CSV numbers per line. It also emits a header and `#`-prefixed messages.
-`# IRQ_STATS` reports cumulative acquisition counters roughly once per second;
-`# WARNING` reports changes in selected fault counters.
+```text
+ADXL345 measurement -> FIFO -> INT1 / GPIO4 rising edge
+  -> ISR/task notification on core 1 -> acquisition task on core 1
+  -> nonblocking RAM queue -> app_main UART writer -> existing PC monitor
+```
 
-See [the serial protocol](../docs/serial-protocol.md) for all field meanings.
-The output has no per-sample hardware timestamp or sequence number. IRQ periods
-and task wake latency are diagnostics, not end-to-end PC latency measurements.
+The GPIO ISR is allocated by the acquisition task on core 1, so the ISR and its
+recipient share a core. The ISR only records timing/counts and notifies the task. It never calls SPI,
+UART, or a blocking function. Notifications may coalesce, so the task reads actual
+FIFO occupancy and drains all entries. A sample is one six-byte burst with
+hardware-controlled CS and a 5 us post-read delay.
 
-Wiring is listed in the [repository README](../README.md). For sensor behavior,
-see the [ADXL345 datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf).
+The native SPI API `spi_device_polling_transmit()` waits for one bus transaction;
+this is **not timer polling for new sensor measurements**. All runtime reads
+remain triggered by INT1. A missing notification increments a timeout after
+100 ms without an automatic polling fallback.
+
+The first 16 samples are counted and discarded. Later samples use nonblocking
+queue insertion; a full queue increments `queue_dropped`. At startup the driver
+checks DEVID=0xE5 and configuration readback. The INT1 wiring test temporarily
+uses DATA_READY and polarity inversion, then restores standby and normal
+polarity. Normal acquisition enables only WATERMARK, as on the tested module.
+
+On selected GPIO initialization or runtime SPI/status faults the task disables/removes the GPIO handler,
+stops measurement, publishes `spi_faults`, then deletes itself. This prevents an
+ISR from notifying a deleted task or invalid samples from being emitted. Reset
+is required to restart acquisition after such a failure. The output task remains
+available for aggregate diagnostic reporting.
+
+## Compatibility with the existing PC monitor
+
+The same `X_g,Y_g,Z_g` header and three-number XYZ rows are emitted at 921600 baud.
+Conversion is still raw count / 256 with five decimal places. The same 16
+`# IRQ_STATS` fields and `# WARNING` prefix are retained. Startup retains the
+`# ADXL345:` prefix so the receiver can recognize a restart. **No PC application
+source changes are needed.** See [the serial protocol](../docs/serial-protocol.md).
+
+UART0 has one application writer with a TX ring buffer. Application/bootloader
+logs and console output are disabled in defaults to keep normal runtime CSV
+clean. ROM messages during reset may still use the ROM boot baud rate, as before.
+
+800 Hz is nominal; aggregate IRQ timings are not hardware timestamps for each
+XYZ line. Gravity remains included. This firmware does not estimate yaw, angles,
+or a stable position trajectory. The PC model's previous limitations apply.
+
+## Tests without a board
+
+After installing the monitor's pySerial dependency, run from the repository root
+with that Python environment and a host GCC/Clang compiler on PATH (or set `CC`):
+
+```powershell
+.\tools\monitor\.venv\Scripts\python.exe firmware\tests\host\run_tests.py
+.\tools\monitor\scripts\Run_Tests.cmd
+```
+
+The C tests execute the production SPI driver, acquisition task, ISR, and wire
+formatter against modeled SDK/SPI/FreeRTOS APIs. They check register setup,
+readback and transfer failures, signed decoding, FIFO delay, warmup, coalesced
+reads, nonblocking backpressure, timeout behavior without polling, timestamp
+wrap, invalid FIFO counts, and cleanup before task deletion. Actual formatted
+bytes are then passed in seven-byte chunks through the existing PC receiver.
+
+Host tests do not prove electrical wiring, real IRQ latency, actual ODR, or
+physical board behavior. On 19 November 2026 the native firmware was flashed and
+checked on COM16: a 120-second capture received 94,256 samples with zero reported
+acquisition faults or malformed lines. Live plots and the 3D model were also
+observed in the unchanged PC monitor. Native and historical Arduino results are
+listed separately in [validation notes](../docs/validation.md).
+
+Driver references: [ESP-IDF SPI master](https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32s3/api-reference/peripherals/spi_master.html),
+[GPIO](https://docs.espressif.com/projects/esp-idf/en/v6.0.2/esp32s3/api-reference/peripherals/gpio.html),
+[ADXL345 datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf).
