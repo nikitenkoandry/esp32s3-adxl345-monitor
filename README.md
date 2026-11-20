@@ -8,7 +8,7 @@ The repository contains source code, documentation, and setup/build scripts.
 Firmware images, Windows executables, Python environments, toolchains, and
 measurement files are generated locally and excluded from Git.
 
-[Connect the sensor](#hardware) · [Install firmware](#1-install-the-ready-made-firmware) ·
+[Watch the video](#video-demo) · [Connect the sensor](#hardware) · [Install firmware](#1-install-the-ready-made-firmware) ·
 [Start the monitor](#2-connect-and-view-acceleration) · [Record CSV](#3-record-and-save-csv) ·
 [Build from source](#build-from-source)
 
@@ -31,6 +31,22 @@ firmware and EXE files.
 
 Start with the [wiring and launch guide](docs/quick-start.md). Release assets stay
 on GitHub Releases; the repository keeps sources and documentation.
+
+## Video demo
+
+A **22-second recording** of the Windows monitor connected to an ESP32-S3 over
+USB-UART: live XYZ acceleration followed by the gravity-based 3D model.
+
+https://github.com/user-attachments/assets/6f334d1c-e492-4902-b0f8-b8551cb7dac8
+
+- **00:00–00:11:** X, Y and Z graphs respond to sensor movement.
+- **About 00:11–00:22:** the 3D model follows changes in gravity-based tilt.
+
+The 3D portion includes fast movement, so the monitor displays orange quality
+messages when acceleration can distort the angle estimate. See the
+[3D controls and limitations](#gravity-based-3d-tilt) for interpretation.
+
+[Open the MP4 file](docs/video/monitor-demo.mp4) · [Video details](docs/video/README.md)
 
 ## Hardware
 

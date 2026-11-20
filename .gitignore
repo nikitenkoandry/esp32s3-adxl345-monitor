@@ -34,3 +34,7 @@ Thumbs.db
 # ESP-IDF generated local configuration; commit sdkconfig.defaults instead.
 firmware/sdkconfig
 firmware/sdkconfig.old
+
+# Local source screen recordings; the compact monitor-demo.mp4 is published.
+/docs/video/acc_log.mp4
+/docs/video/3d_orient.mp4
