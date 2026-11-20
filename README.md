@@ -65,6 +65,11 @@ data cable connected to the board's USB-UART port.
 | CS | GPIO10 |
 | INT1 | GPIO4 |
 
+![ADXL345 to ESP32-S3 SPI wiring](docs/images/wiring-esp32s3-adxl345.png)
+
+[Vector diagram (SVG)](docs/images/wiring-esp32s3-adxl345.svg).
+Terminal positions are schematic; follow the printed pin labels on your boards.
+
 **INT1 is required.** The firmware uses a one-sample FIFO watermark interrupt;
 there is no polling fallback if the interrupt wire is missing.
 

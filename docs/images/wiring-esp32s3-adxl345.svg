@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1120" viewBox="0 0 1800 1120" role="img" aria-labelledby="title description">
+<title id="title">ADXL345 to ESP32-S3 SPI wiring</title>
+<desc id="description">VCC to 3V3, GND to GND, SCLK to GPIO12, SDA or SDI to GPIO11, SDO to GPIO13, CS to GPIO10, and INT1 to GPIO4. Use the USB-UART connector to the PC at 921600 baud. Terminal positions are schematic.</desc>
+<rect x='0' y='0' width='1800' height='1120' fill='#F4F7FB'/>
+<rect x='0' y='0' width='1800' height='166' fill='#0E2034'/>
+<text x='80' y='76' font-family='Segoe UI,Arial,sans-serif' font-size='44' font-weight='700' text-anchor='start' fill='#FFFFFF'>ADXL345 + ESP32-S3</text>
+<text x='80' y='125' font-family='Segoe UI,Arial,sans-serif' font-size='25' font-weight='400' text-anchor='start' fill='#B6C9DD'>SPI wiring for the ESP-IDF acceleration monitor</text>
+<rect x='1355' y='51' width='365' height='58' fill='#1E3A53'/>
+<text x='1537' y='90' font-family='Segoe UI,Arial,sans-serif' font-size='24' font-weight='700' text-anchor='middle' fill='#FFFFFF'>7 wires  /  3.3 V logic</text>
+<rect x='80' y='220' width='480' height='665' fill='#FFFFFF' stroke='#D5E0EB' stroke-width='2'/>
+<rect x='80' y='220' width='480' height='100' fill='#E3F4EB'/>
+<text x='112' y='268' font-family='Segoe UI,Arial,sans-serif' font-size='33' font-weight='700' text-anchor='start' fill='#176B4A'>ADXL345</text>
+<text x='112' y='302' font-family='Segoe UI,Arial,sans-serif' font-size='21' font-weight='400' text-anchor='start' fill='#36715A'>3-axis accelerometer module</text>
+<rect x='1240' y='220' width='480' height='665' fill='#FFFFFF' stroke='#D5E0EB' stroke-width='2'/>
+<rect x='1240' y='220' width='480' height='100' fill='#E4EEFA'/>
+<text x='1272' y='268' font-family='Segoe UI,Arial,sans-serif' font-size='33' font-weight='700' text-anchor='start' fill='#17568D'>ESP32-S3</text>
+<text x='1272' y='302' font-family='Segoe UI,Arial,sans-serif' font-size='21' font-weight='400' text-anchor='start' fill='#3E6387'>DevKitC-1  /  16 MB flash</text>
+<rect x='96' y='343' width='446' height='59' fill='#F3F7FA'/>
+<rect x='1258' y='343' width='444' height='59' fill='#F3F7FA'/>
+<text x='115' y='382' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>VCC / 3V3</text>
+<text x='1280' y='382' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>3V3</text>
+<line x1='560' y1='374' x2='1240' y2='374' stroke='#D34047' stroke-width='5' stroke-linecap='round'/>
+<circle cx='560' cy='374' r='9' fill='#D34047'/>
+<circle cx='1240' cy='374' r='9' fill='#D34047'/>
+<text x='900' y='359' font-family='Segoe UI,Arial,sans-serif' font-size='23' font-weight='700' text-anchor='middle' fill='#D34047'>3.3 V power</text>
+<line x1='915' y1='366' x2='900' y2='374' stroke='#D34047' stroke-width='4' stroke-linecap='round'/>
+<line x1='915' y1='382' x2='900' y2='374' stroke='#D34047' stroke-width='4' stroke-linecap='round'/>
+<text x='115' y='454' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>GND</text>
+<text x='1280' y='454' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>GND</text>
+<line x1='560' y1='446' x2='1240' y2='446' stroke='#526375' stroke-width='5' stroke-linecap='round'/>
+<circle cx='560' cy='446' r='9' fill='#526375'/>
+<circle cx='1240' cy='446' r='9' fill='#526375'/>
+<text x='900' y='431' font-family='Segoe UI,Arial,sans-serif' font-size='23' font-weight='700' text-anchor='middle' fill='#526375'>Common ground</text>
+<rect x='96' y='487' width='446' height='59' fill='#F3F7FA'/>
+<rect x='1258' y='487' width='444' height='59' fill='#F3F7FA'/>
+<text x='115' y='526' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>SCLK / SCL</text>
+<text x='1280' y='526' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>GPIO12</text>
+<line x1='560' y1='518' x2='1240' y2='518' stroke='#2974D5' stroke-width='5' stroke-linecap='round'/>
+<circle cx='560' cy='518' r='9' fill='#2974D5'/>
+<circle cx='1240' cy='518' r='9' fill='#2974D5'/>
+<text x='900' y='503' font-family='Segoe UI,Arial,sans-serif' font-size='23' font-weight='700' text-anchor='middle' fill='#2974D5'>SPI clock</text>
+<line x1='915' y1='510' x2='900' y2='518' stroke='#2974D5' stroke-width='4' stroke-linecap='round'/>
+<line x1='915' y1='526' x2='900' y2='518' stroke='#2974D5' stroke-width='4' stroke-linecap='round'/>
+<text x='115' y='598' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>SDA / SDI</text>
+<text x='1280' y='598' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>GPIO11</text>
+<line x1='560' y1='590' x2='1240' y2='590' stroke='#12805D' stroke-width='5' stroke-linecap='round'/>
+<circle cx='560' cy='590' r='9' fill='#12805D'/>
+<circle cx='1240' cy='590' r='9' fill='#12805D'/>
+<text x='900' y='575' font-family='Segoe UI,Arial,sans-serif' font-size='23' font-weight='700' text-anchor='middle' fill='#12805D'>MOSI  |  ESP to sensor</text>
+<line x1='915' y1='582' x2='900' y2='590' stroke='#12805D' stroke-width='4' stroke-linecap='round'/>
+<line x1='915' y1='598' x2='900' y2='590' stroke='#12805D' stroke-width='4' stroke-linecap='round'/>
+<rect x='96' y='631' width='446' height='59' fill='#F3F7FA'/>
+<rect x='1258' y='631' width='444' height='59' fill='#F3F7FA'/>
+<text x='115' y='670' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>SDO</text>
+<text x='1280' y='670' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>GPIO13</text>
+<line x1='560' y1='662' x2='1240' y2='662' stroke='#07849D' stroke-width='5' stroke-linecap='round'/>
+<circle cx='560' cy='662' r='9' fill='#07849D'/>
+<circle cx='1240' cy='662' r='9' fill='#07849D'/>
+<text x='900' y='647' font-family='Segoe UI,Arial,sans-serif' font-size='23' font-weight='700' text-anchor='middle' fill='#07849D'>MISO  |  sensor to ESP</text>
+<line x1='885' y1='654' x2='900' y2='662' stroke='#07849D' stroke-width='4' stroke-linecap='round'/>
+<line x1='885' y1='670' x2='900' y2='662' stroke='#07849D' stroke-width='4' stroke-linecap='round'/>
+<text x='115' y='742' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>CS</text>
+<text x='1280' y='742' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>GPIO10</text>
+<line x1='560' y1='734' x2='1240' y2='734' stroke='#BC6A10' stroke-width='5' stroke-linecap='round'/>
+<circle cx='560' cy='734' r='9' fill='#BC6A10'/>
+<circle cx='1240' cy='734' r='9' fill='#BC6A10'/>
+<text x='900' y='719' font-family='Segoe UI,Arial,sans-serif' font-size='23' font-weight='700' text-anchor='middle' fill='#BC6A10'>Chip select</text>
+<line x1='915' y1='726' x2='900' y2='734' stroke='#BC6A10' stroke-width='4' stroke-linecap='round'/>
+<line x1='915' y1='742' x2='900' y2='734' stroke='#BC6A10' stroke-width='4' stroke-linecap='round'/>
+<rect x='96' y='775' width='446' height='59' fill='#F3F7FA'/>
+<rect x='1258' y='775' width='444' height='59' fill='#F3F7FA'/>
+<text x='115' y='814' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>INT1</text>
+<text x='1280' y='814' font-family='Segoe UI,Arial,sans-serif' font-size='27' font-weight='700' text-anchor='start' fill='#172B40'>GPIO4</text>
+<line x1='560' y1='806' x2='1240' y2='806' stroke='#8A4DCE' stroke-width='5' stroke-linecap='round'/>
+<circle cx='560' cy='806' r='9' fill='#8A4DCE'/>
+<circle cx='1240' cy='806' r='9' fill='#8A4DCE'/>
+<text x='900' y='791' font-family='Segoe UI,Arial,sans-serif' font-size='23' font-weight='700' text-anchor='middle' fill='#8A4DCE'>FIFO interrupt  |  required</text>
+<line x1='885' y1='798' x2='900' y2='806' stroke='#8A4DCE' stroke-width='4' stroke-linecap='round'/>
+<line x1='885' y1='814' x2='900' y2='806' stroke='#8A4DCE' stroke-width='4' stroke-linecap='round'/>
+<text x='112' y='858' font-family='Segoe UI,Arial,sans-serif' font-size='20' font-weight='400' text-anchor='start' fill='#61768B'>INT2: leave unconnected</text>
+<text x='1272' y='858' font-family='Segoe UI,Arial,sans-serif' font-size='20' font-weight='700' text-anchor='start' fill='#17568D'>USB-UART connector to the PC</text>
+<rect x='80' y='924' width='800' height='95' fill='#FFF3DE' stroke='#EBD7B3' stroke-width='1'/>
+<text x='104' y='962' font-family='Segoe UI,Arial,sans-serif' font-size='25' font-weight='700' text-anchor='start' fill='#865000'>Use 3.3 V power and logic</text>
+<text x='104' y='998' font-family='Segoe UI,Arial,sans-serif' font-size='21' font-weight='400' text-anchor='start' fill='#865000'>Disconnect power while wiring. Keep signal wires short.</text>
+<rect x='904' y='924' width='816' height='95' fill='#E4EEFA' stroke='#C8DAEE' stroke-width='1'/>
+<text x='928' y='962' font-family='Segoe UI,Arial,sans-serif' font-size='24' font-weight='700' text-anchor='start' fill='#17568D'>USB-UART to Windows monitor  |  921600 baud</text>
+<text x='928' y='998' font-family='Segoe UI,Arial,sans-serif' font-size='21' font-weight='400' text-anchor='start' fill='#17568D'>SPI: mode 3, 2 MHz  |  ADXL345: nominal 800 Hz</text>
+<text x='80' y='1060' font-family='Segoe UI,Arial,sans-serif' font-size='22' font-weight='400' text-anchor='start' fill='#526375'>Terminal positions are schematic. Follow the printed pin labels on your boards.</text>
+<text x='80' y='1093' font-family='Segoe UI,Arial,sans-serif' font-size='20' font-weight='400' text-anchor='start' fill='#526375'>SDA / SDI is MOSI in SPI mode; SDO is MISO. INT1 must connect to GPIO4.</text>
+</svg>
