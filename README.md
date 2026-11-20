@@ -55,6 +55,12 @@ PSRAM is not required. Check the flash configuration before using another board.
 Use an ADXL345 module with **3.3 V power and logic**, a shared ground, and a USB
 data cable connected to the board's USB-UART port.
 
+![Photo-based ESP32-S3 DevKitC-1 and ADXL345 wiring illustration](docs/images/wiring-esp32s3-adxl345-photo.png)
+
+Illustration based on Espressif's [official DevKitC-1 board reference](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html).
+The sensor terminal positions are illustrative; follow the pin labels on your
+ADXL345 module. The table and schematic below show the same seven connections.
+
 | ADXL345 | ESP32-S3 |
 | --- | --- |
 | VCC | 3V3 |
